@@ -14,6 +14,7 @@ import {
 } from '@/lib/whatsapp/template-validators'
 import { buildMetaTemplatePayload } from '@/lib/whatsapp/template-components'
 import { ensureMediaHeaderHandle } from '@/lib/whatsapp/template-header-handle'
+import { metaMessageWithDetails } from '@/lib/whatsapp/meta-error-explain'
 import { normalizeStatus } from '@/lib/whatsapp/template-status-normalize'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 import { getT } from '@/lib/i18n/translate'
@@ -195,7 +196,7 @@ export async function POST(request: Request) {
         metaTemplateId = meta.id
         metaStatus = meta.status
       } catch (e) {
-        const message = e instanceof Error ? e.message : t('templates.metaSubmitFailed')
+        const message = e instanceof Error ? metaMessageWithDetails(e) : t('templates.metaSubmitFailed')
         // Persist the failure so the user can retry; row stays DRAFT
         // until they fix and re-submit.
         await upsertTemplateRow(

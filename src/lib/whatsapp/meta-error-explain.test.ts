@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   explainMetaError,
   metaErrorPayload,
+  metaMessageWithDetails,
   type MetaErrorLike,
 } from "./meta-error-explain";
 
@@ -216,5 +217,18 @@ describe("metaErrorPayload", () => {
       field: "access_token",
       message: "expired",
     });
+  });
+});
+
+describe("metaMessageWithDetails", () => {
+  it("appends details when present", () => {
+    expect(metaMessageWithDetails({ message: "Invalid parameter", details: "why" })).toBe(
+      "Invalid parameter (why)",
+    );
+  });
+
+  it("returns the bare message otherwise", () => {
+    expect(metaMessageWithDetails({ message: "Invalid parameter" })).toBe("Invalid parameter");
+    expect(metaMessageWithDetails(new Error("plain"))).toBe("plain");
   });
 });

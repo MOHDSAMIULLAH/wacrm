@@ -44,6 +44,12 @@ interface MetaErrorResponse {
     fbtrace_id?: string
     /** WhatsApp-specific envelope — `details` is the human-readable part. */
     error_data?: { messaging_product?: string; details?: string }
+    /**
+     * Template endpoints leave `error_data` empty and explain the
+     * failure here instead ("Invalid parameter" alone says nothing).
+     */
+    error_user_title?: string
+    error_user_msg?: string
   }
 }
 
@@ -63,7 +69,11 @@ export class MetaApiError extends Error {
   readonly type: string | null
   readonly fbtraceId: string | null
   readonly httpStatus: number
-  /** `error.error_data.details` — WhatsApp endpoints put the useful text here. */
+  /**
+   * `error.error_data.details` — WhatsApp endpoints put the useful text
+   * here. Falls back to `error_user_title: error_user_msg`, which is
+   * where template endpoints put it.
+   */
   readonly details: string | null
 
   constructor(
@@ -92,6 +102,13 @@ export class MetaApiError extends Error {
  * Read a failed Graph response into a MetaApiError without throwing.
  * Consumes the body — call at most once per response.
  */
+function userFacingReason(envelope: MetaErrorResponse['error']): string | null {
+  const parts = [envelope?.error_user_title, envelope?.error_user_msg].filter(
+    (s): s is string => typeof s === 'string' && s.trim().length > 0,
+  )
+  return parts.length ? parts.join(': ') : null
+}
+
 async function readMetaError(response: Response, fallback: string): Promise<MetaApiError> {
   let message = fallback
   let envelope: MetaErrorResponse['error'] | undefined
@@ -108,7 +125,7 @@ async function readMetaError(response: Response, fallback: string): Promise<Meta
     type: envelope?.type ?? null,
     fbtraceId: envelope?.fbtrace_id ?? null,
     httpStatus: response.status,
-    details: envelope?.error_data?.details ?? null,
+    details: envelope?.error_data?.details ?? userFacingReason(envelope),
   })
 }
 

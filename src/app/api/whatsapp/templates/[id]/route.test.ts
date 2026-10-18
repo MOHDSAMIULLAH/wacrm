@@ -183,3 +183,19 @@ describe('template lifecycle rate limit', () => {
     expect(meta.deleteMessageTemplate).not.toHaveBeenCalled()
   })
 })
+
+describe('template edit Meta failure', () => {
+  it("answers 502 with Meta's details, not just the bare message", async () => {
+    meta.editMessageTemplate.mockRejectedValueOnce(
+      Object.assign(new Error('Invalid parameter'), {
+        details: 'Parameter format mismatch: This template uses named parameters.',
+      }),
+    )
+    const res = await patchTemplate()
+    expect(res.status).toBe(502)
+    const body = await res.json()
+    expect(body.error).toBe(
+      'Invalid parameter (Parameter format mismatch: This template uses named parameters.)',
+    )
+  })
+})

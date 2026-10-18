@@ -107,6 +107,11 @@ function withId(noun: string, id: string | null): string {
   return id ? `${noun} ${id}` : `the ${noun}`
 }
 
+/** Meta's message with `details` appended when present — what a user should see. */
+export function metaMessageWithDetails(err: { message: string; details?: string | null }): string {
+  return err.details ? `${err.message} (${err.details})` : err.message
+}
+
 /**
  * Explain any error thrown while talking to Meta during the connect flow.
  * Non-Meta errors (network failures, unexpected throws) get a generic
@@ -137,7 +142,7 @@ export function explainMetaError(
   const code = err.code ?? null
   const subcode = err.subcode ?? null
   const fbtraceId = err.fbtraceId ?? null
-  const metaMessage = err.details ? `${err.message} (${err.details})` : err.message
+  const metaMessage = metaMessageWithDetails(err)
   const target = objectForStep(step, ctx)
 
   const build = (

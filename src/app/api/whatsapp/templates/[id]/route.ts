@@ -16,6 +16,7 @@ import {
 } from '@/lib/whatsapp/template-validators'
 import { buildMetaTemplatePayload } from '@/lib/whatsapp/template-components'
 import { ensureMediaHeaderHandle } from '@/lib/whatsapp/template-header-handle'
+import { metaMessageWithDetails } from '@/lib/whatsapp/meta-error-explain'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
 import { getT } from '@/lib/i18n/translate'
 
@@ -169,7 +170,7 @@ export async function PATCH(
           components: metaPayload.components,
         })
       } catch (e) {
-        const message = e instanceof Error ? e.message : t('templates.metaEditFailed')
+        const message = e instanceof Error ? metaMessageWithDetails(e) : t('templates.metaEditFailed')
         await supabase
           .from('message_templates')
           .update({
