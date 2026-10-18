@@ -508,7 +508,11 @@
       "send": "Enviar plantilla",
       "headerVarLabel": "Encabezado {var}",
       "bodyVarLabel": "Cuerpo {var}",
-      "urlButtonVarLabel": "Botón de URL \"{text}\": valor para {var}"
+      "urlButtonVarLabel": "Botón de URL \"{text}\": valor para {var}",
+      "headerMediaLabel": "URL {type, select, image {de la imagen} video {del video} other {del documento}} del encabezado",
+      "headerMediaPlaceholder": "https://example.com/image.jpg",
+      "headerMediaHint": "Enlace público http(s) que WhatsApp pueda descargar. Se envía como encabezado de esta plantilla.",
+      "headerMediaInvalid": "Introduce una URL http(s) válida."
     },
     "sidebar": {
       "contactInfo": "Información del contacto",

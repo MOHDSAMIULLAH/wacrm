@@ -508,7 +508,11 @@
       "send": "템플릿 보내기",
       "headerVarLabel": "헤더 {var}",
       "bodyVarLabel": "본문 {var}",
-      "urlButtonVarLabel": "URL 버튼 \"{text}\" — {var} 값"
+      "urlButtonVarLabel": "URL 버튼 \"{text}\" — {var} 값",
+      "headerMediaLabel": "헤더 {type, select, image {이미지} video {동영상} other {문서}} URL",
+      "headerMediaPlaceholder": "https://example.com/image.jpg",
+      "headerMediaHint": "WhatsApp이 다운로드할 수 있는 공개 http(s) 링크입니다. 이 템플릿의 헤더로 전송됩니다.",
+      "headerMediaInvalid": "유효한 http(s) URL을 입력하세요."
     },
     "sidebar": {
       "contactInfo": "연락처 정보",

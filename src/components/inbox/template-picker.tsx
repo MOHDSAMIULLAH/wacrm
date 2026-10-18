@@ -22,11 +22,17 @@ import {
   Loader2,
 } from "lucide-react";
 import { extractVariableIndices } from "@/lib/whatsapp/template-validators";
+import {
+  headerMediaUrlError,
+  templateMediaHeaderType,
+  type MediaHeaderType,
+} from "@/lib/whatsapp/template-media-header";
 import { useTranslations } from "next-intl";
 
 export interface TemplateSendValues {
   body: string[];
   headerText?: string;
+  headerMediaUrl?: string;
   buttonParams?: Record<number, string>;
 }
 
@@ -52,12 +58,13 @@ interface UrlButtonSlot {
 
 /**
  * Templates may need values for: body variables, a text-header
- * variable, and per-URL-button suffixes. Collect them all so the
- * send-message path doesn't 400 on missing parameters.
+ * variable, a media-header link, and per-URL-button suffixes. Collect
+ * them all so the send-message path doesn't 400 on missing parameters.
  */
 function collectVariableSlots(template: MessageTemplate): {
   bodyVars: number[];
   headerVarCount: number;
+  mediaHeaderType: MediaHeaderType | null;
   urlButtonSlots: UrlButtonSlot[];
 } {
   const bodyVars = extractVariableIndices(template.body_text);
@@ -71,7 +78,8 @@ function collectVariableSlots(template: MessageTemplate): {
       urlButtonSlots.push({ index: i, text: b.text, url: b.url });
     }
   });
-  return { bodyVars, headerVarCount, urlButtonSlots };
+  const mediaHeaderType = templateMediaHeaderType(template);
+  return { bodyVars, headerVarCount, mediaHeaderType, urlButtonSlots };
 }
 
 export function TemplatePicker({
@@ -86,6 +94,7 @@ export function TemplatePicker({
   const [selected, setSelected] = useState<MessageTemplate | null>(null);
   const [params, setParams] = useState<string[]>([]);
   const [headerText, setHeaderText] = useState<string>("");
+  const [headerMediaUrl, setHeaderMediaUrl] = useState<string>("");
   const [buttonParams, setButtonParams] = useState<Record<number, string>>({});
 
   useEffect(() => {
@@ -136,6 +145,7 @@ export function TemplatePicker({
     setSelected(null);
     setParams([]);
     setHeaderText("");
+    setHeaderMediaUrl("");
     setButtonParams({});
   }
 
@@ -146,9 +156,13 @@ export function TemplatePicker({
 
   function pickTemplate(template: MessageTemplate) {
     const slots = collectVariableSlots(template);
+    // A media header with a stored URL rides along automatically in the
+    // send builder; one without (e.g. synced from WhatsApp Manager)
+    // needs the user to supply a link.
     const noInputsNeeded =
       slots.bodyVars.length === 0 &&
       slots.headerVarCount === 0 &&
+      (!slots.mediaHeaderType || !!template.header_media_url) &&
       slots.urlButtonSlots.length === 0;
     if (noInputsNeeded) {
       onSelect(template, { body: [] });
@@ -158,6 +172,7 @@ export function TemplatePicker({
     setSelected(template);
     setParams(new Array(slots.bodyVars.length).fill(""));
     setHeaderText("");
+    setHeaderMediaUrl(template.header_media_url ?? "");
     setButtonParams({});
   }
 
@@ -165,6 +180,9 @@ export function TemplatePicker({
     if (!selected) return;
     const values: TemplateSendValues = { body: params };
     if (headerText.trim()) values.headerText = headerText.trim();
+    if (templateMediaHeaderType(selected) && headerMediaUrl.trim()) {
+      values.headerMediaUrl = headerMediaUrl.trim();
+    }
     if (Object.keys(buttonParams).length > 0) {
       values.buttonParams = Object.fromEntries(
         Object.entries(buttonParams).map(([k, v]) => [Number(k), v.trim()]),
@@ -183,6 +201,7 @@ export function TemplatePicker({
     !!slots &&
     slots.bodyVars.every((_, i) => (params[i] ?? "").trim().length > 0) &&
     (slots.headerVarCount === 0 || headerText.trim().length > 0) &&
+    headerMediaUrlError(selected, headerMediaUrl) === null &&
     slots.urlButtonSlots.every(
       (s) => (buttonParams[s.index] ?? "").trim().length > 0,
     );
@@ -261,6 +280,25 @@ export function TemplatePicker({
                 </p>
               )}
             </div>
+            {slots?.mediaHeaderType && (
+              <div className="space-y-1">
+                <Label className="text-xs text-popover-foreground">
+                  {t("headerMediaLabel", { type: slots.mediaHeaderType })}
+                </Label>
+                <Input
+                  type="url"
+                  value={headerMediaUrl}
+                  onChange={(e) => setHeaderMediaUrl(e.target.value)}
+                  placeholder={t("headerMediaPlaceholder")}
+                  className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  {headerMediaUrlError(selected, headerMediaUrl) === "invalid"
+                    ? t("headerMediaInvalid")
+                    : t("headerMediaHint")}
+                </p>
+              </div>
+            )}
             {slots && slots.headerVarCount > 0 && (
               <div className="space-y-1">
                 <Label className="text-xs text-popover-foreground">

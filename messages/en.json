@@ -508,7 +508,11 @@
       "send": "Send template",
       "headerVarLabel": "Header {var}",
       "bodyVarLabel": "Body {var}",
-      "urlButtonVarLabel": "URL button \"{text}\" — value for {var}"
+      "urlButtonVarLabel": "URL button \"{text}\" — value for {var}",
+      "headerMediaLabel": "Header {type, select, image {image} video {video} other {document}} URL",
+      "headerMediaPlaceholder": "https://example.com/image.jpg",
+      "headerMediaHint": "Public http(s) link WhatsApp can download. Sent as this template's header.",
+      "headerMediaInvalid": "Enter a valid http(s) URL."
     },
     "sidebar": {
       "contactInfo": "Contact info",

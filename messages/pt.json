@@ -508,7 +508,11 @@
       "send": "Enviar modelo",
       "headerVarLabel": "Cabeçalho {var}",
       "bodyVarLabel": "Corpo {var}",
-      "urlButtonVarLabel": "Botão de URL \"{text}\" — valor para {var}"
+      "urlButtonVarLabel": "Botão de URL \"{text}\" — valor para {var}",
+      "headerMediaLabel": "URL {type, select, image {da imagem} video {do vídeo} other {do documento}} do cabeçalho",
+      "headerMediaPlaceholder": "https://example.com/image.jpg",
+      "headerMediaHint": "Link público http(s) que o WhatsApp consiga baixar. Enviado como cabeçalho deste modelo.",
+      "headerMediaInvalid": "Insira uma URL http(s) válida."
     },
     "sidebar": {
       "contactInfo": "Informações do contato",
